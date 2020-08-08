@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/dhuki/rest-template/common"
 	"github.com/gorilla/mux"
@@ -25,8 +26,9 @@ func (r router) Start() error {
 	// bcs this struct not return an interface
 	// but if struct return an interface you should return as pointer if it's not it will error
 	srv := &http.Server{
-		Handler: r.Mux,
-		Addr:    fmt.Sprintf("%s:%s", common.Host, common.Port),
+		Handler:      http.TimeoutHandler(r.Mux, time.Second * 1, "Timeout!"),
+		Addr:         fmt.Sprintf("%s:%s", common.Host, common.Port),
+		WriteTimeout: time.Second * 2,
 	}
 	return srv.ListenAndServe()
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 
 	"github.com/dhuki/rest-template/cmd/testing"
@@ -58,4 +59,6 @@ func main() {
 	}()
 
 	level.Error(logger).Log("description", "Server error", "message", <-errChan)
+
+	fmt.Println(runtime.NumGoroutine())
 }

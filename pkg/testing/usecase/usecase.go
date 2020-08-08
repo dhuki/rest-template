@@ -7,5 +7,5 @@ import (
 )
 
 type Usecase interface {
-	GetAllData(context.Context) (common.BaseResponse, error)
+	GetAllData(context.Context) common.BaseResponse
 }

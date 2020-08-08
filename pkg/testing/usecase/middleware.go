@@ -21,7 +21,7 @@ func NewMiddleware(usecase Usecase, logger log.Logger) Usecase {
 	}
 }
 
-func (m middelware) GetAllData(ctx context.Context) (response common.BaseResponse, err error) {
+func (m middelware) GetAllData(ctx context.Context) (response common.BaseResponse) {
 	// interceptors
 	defer func(begin time.Time) {
 		level.Info(m.logger).Log(
