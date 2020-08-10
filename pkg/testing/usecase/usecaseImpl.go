@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"time"
 
 	"github.com/dhuki/rest-template/common"
 	"github.com/dhuki/rest-template/pkg/testing/domain/repo"
@@ -26,8 +25,6 @@ func (u usecaseImpl) GetAllData(ctx context.Context) common.BaseResponse {
 			Error: err,
 		}
 	}
-
-	time.Sleep(time.Second * 2)
 
 	return common.BaseResponse{
 		Success: common.RESPONSE_SUCCESS,

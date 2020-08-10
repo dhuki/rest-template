@@ -12,6 +12,7 @@ import (
 
 func MakeGetAllDataEndpointWithGoroutine(usecase usecase.Usecase) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		// source : https://www.ardanlabs.com/blog/2018/11/goroutine-leaks-the-forgotten-sender.html
 		response := make(chan common.BaseResponse, 1)
 
 		go func() {

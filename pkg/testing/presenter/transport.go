@@ -11,6 +11,8 @@ import (
 
 func NewServer(mux *mux.Router, usecase usecase.Usecase, logger log.Logger) {
 	r := mux.PathPrefix("/api").Subrouter()
+	r.Use(middleware.SetContentTypeToJson)
+	r.Use(middleware.SetInterceptors(logger))
 
 	options := []httptransport.ServerOption{
 		httptransport.ServerErrorEncoder(middleware.ErrorEncoder),             // error for client
@@ -18,6 +20,22 @@ func NewServer(mux *mux.Router, usecase usecase.Usecase, logger log.Logger) {
 	}
 
 	r.Methods("GET").Path("/testing").Handler(httptransport.NewServer(
+		MakeGetAllDataEndpoint(usecase),
+		model.DecodeGetAllRequest,
+		model.EncodeResponse,
+		options...,
+	))
+
+	r.Methods("GET").Path("/testing/{param}").Handler(httptransport.NewServer(
+		MakeGetAllDataEndpoint(usecase),
+		model.DecodeGetAllRequest,
+		model.EncodeResponse,
+		options...,
+	))
+
+	r.Methods("GET").Path("/testing").Queries(
+		"param", "{param}",
+	).Handler(httptransport.NewServer(
 		MakeGetAllDataEndpoint(usecase),
 		model.DecodeGetAllRequest,
 		model.EncodeResponse,

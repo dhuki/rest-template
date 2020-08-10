@@ -32,7 +32,6 @@ func (t testingServer) Start() {
 	{
 		infrastructure := infrastructure.NewTestTableInfrastructure(t.db)
 		srv = usecase.NewUsecase(infrastructure)
-		srv = usecase.NewMiddleware(srv, t.logger)
 	}
 
 	presenter.NewServer(t.mux, srv, t.logger)
