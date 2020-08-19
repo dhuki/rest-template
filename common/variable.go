@@ -7,6 +7,11 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// create type of contextKey for key context
+type (
+	contextKey uint
+)
+
 var (
 	DbUsername string
 	DbPassword string
@@ -24,6 +29,7 @@ var (
 
 var (
 	ErrDataNotFound = errors.New("Data not found")
+	ErrAssertion    = errors.New("Error Assertion")
 )
 
 func LoadCons(path string) error {

@@ -5,7 +5,7 @@ package entity
 
 // pacakge for defined mapping database
 type TestTable struct {
-	ID          string `json:"ID"`
+	ID          int    `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 }

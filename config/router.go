@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/dhuki/rest-template/common"
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -20,15 +21,21 @@ func NewRouter() router {
 	}
 }
 
+func wireWithCors(r router) http.Handler {
+	return handlers.CORS(
+		handlers.AllowedOrigins([]string{"http://localhost:3001"}),
+	)(r.Mux)
+}
+
 func (r router) Start() error {
 	// using pointer bcs receiver is pointer
 	// actually it's okay to use not pointer even receiver is pointer
 	// bcs this struct not return an interface
 	// but if struct return an interface you should return as pointer if it's not it will error
 	srv := &http.Server{
-		Handler:      http.TimeoutHandler(r.Mux, time.Second * 1, "Timeout!"),
+		Handler:      wireWithCors(r),
 		Addr:         fmt.Sprintf("%s:%s", common.Host, common.Port),
-		WriteTimeout: time.Second * 2,
+		WriteTimeout: time.Second * 5,
 	}
 	return srv.ListenAndServe()
 }

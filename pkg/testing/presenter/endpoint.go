@@ -2,10 +2,9 @@ package presenter
 
 import (
 	"context"
-	"fmt"
-	"runtime"
 
 	"github.com/dhuki/rest-template/common"
+	"github.com/dhuki/rest-template/pkg/testing/domain/entity"
 	"github.com/dhuki/rest-template/pkg/testing/usecase"
 	"github.com/go-kit/kit/endpoint"
 )
@@ -34,7 +33,17 @@ func MakeGetAllDataEndpointWithGoroutine(usecase usecase.Usecase) endpoint.Endpo
 func MakeGetAllDataEndpoint(usecase usecase.Usecase) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		response := usecase.GetAllData(ctx)
-		fmt.Println(runtime.NumGoroutine())
+		return response, response.Error
+	}
+}
+
+func MakeCreateDataEndpoint(usecase usecase.Usecase) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req, ok := request.(entity.TestTable)
+		if !ok {
+			return nil, common.ErrAssertion
+		}
+		response := usecase.CreateData(ctx, req)
 		return response, response.Error
 	}
 }

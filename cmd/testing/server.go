@@ -6,7 +6,7 @@ import (
 	"github.com/dhuki/rest-template/pkg/testing/usecase"
 	"github.com/go-kit/kit/log"
 	"github.com/gorilla/mux"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 type server interface {

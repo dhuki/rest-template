@@ -11,7 +11,7 @@ import (
 	"github.com/dhuki/rest-template/common"
 	"github.com/dhuki/rest-template/config"
 	"github.com/go-kit/kit/log/level"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 func main() {
