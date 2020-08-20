@@ -6,15 +6,15 @@ import (
 	"github.com/dhuki/rest-template/pkg/testing/usecase"
 	"github.com/go-kit/kit/log"
 	httptransport "github.com/go-kit/kit/transport/http"
-	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
-func NewServer(mux *mux.Router, usecase usecase.Usecase, logger log.Logger) {
+func NewServer(mux *mux.Router, usecase usecase.Usecase, logger log.Logger, middlewares []mux.MiddlewareFunc) {
 	r := mux.PathPrefix("/api").Subrouter()
 	// r.Use(middleware.SetContentTypeToJson) // by default go-kit provided function to response as json
 	// r.Use(middleware.SetInterceptors(logger)) // by default there go-kit provided "ServerFinalizerFunc" for logging request
-	r.Use(handlers.CompressHandler) // compress response to gzip encoding
+	// r.Use(handlers.CompressHandler) // compress response to gzip encoding
+	r.Use(middlewares...)
 
 	options := []httptransport.ServerOption{
 		httptransport.ServerBefore(httptransport.PopulateRequestContext),      // executed on the HTTP request object before the request is decoded.
@@ -24,14 +24,14 @@ func NewServer(mux *mux.Router, usecase usecase.Usecase, logger log.Logger) {
 	}
 
 	r.Methods("GET").Path("/testing").Handler(httptransport.NewServer(
-		MakeGetAllDataEndpoint(usecase),
+		MakeGetAllDataEndpointWithGoroutine(usecase),
 		httptransport.NopRequestDecoder,  // go-kit provided requests that do not need to be decoded
 		httptransport.EncodeJSONResponse, // go-kit provided response to be encoded to json and add req header as content-type json
 		options...,
 	))
 
 	r.Methods("GET").Path("/testing/{param}").Handler(httptransport.NewServer(
-		MakeGetAllDataEndpoint(usecase),
+		MakeGetAllDataEndpointWithGoroutine(usecase),
 		httptransport.NopRequestDecoder,
 		httptransport.EncodeJSONResponse,
 		options...,
@@ -40,7 +40,7 @@ func NewServer(mux *mux.Router, usecase usecase.Usecase, logger log.Logger) {
 	r.Methods("GET").Path("/testing").Queries(
 		"param", "{param}",
 	).Handler(httptransport.NewServer(
-		MakeGetAllDataEndpoint(usecase),
+		MakeGetAllDataEndpointWithGoroutine(usecase),
 		httptransport.NopRequestDecoder,
 		httptransport.EncodeJSONResponse,
 		options...,

@@ -23,7 +23,8 @@ func NewRouter() router {
 
 func wireWithCors(r router) http.Handler {
 	return handlers.CORS(
-		handlers.AllowedOrigins([]string{"http://localhost:3001"}),
+		handlers.AllowedOrigins([]string{"*"}),
+		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "PATCH"}),
 	)(r.Mux)
 }
 

@@ -14,16 +14,18 @@ type server interface {
 }
 
 type testingServer struct {
-	mux    *mux.Router
-	db     *gorm.DB
-	logger log.Logger
+	mux         *mux.Router
+	db          *gorm.DB
+	middlewares []mux.MiddlewareFunc
+	logger      log.Logger
 }
 
-func NewServer(mux *mux.Router, db *gorm.DB, logger log.Logger) server {
+func NewServer(mux *mux.Router, db *gorm.DB, logger log.Logger, middlewares []mux.MiddlewareFunc) server {
 	return testingServer{
-		mux:    mux,
-		db:     db,
-		logger: logger,
+		mux:         mux,
+		db:          db,
+		logger:      logger,
+		middlewares: middlewares,
 	}
 }
 
@@ -34,5 +36,5 @@ func (t testingServer) Start() {
 		srv = usecase.NewUsecase(infrastructure)
 	}
 
-	presenter.NewServer(t.mux, srv, t.logger)
+	presenter.NewServer(t.mux, srv, t.logger, t.middlewares)
 }

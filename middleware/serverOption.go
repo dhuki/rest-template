@@ -29,7 +29,6 @@ func SetInterceptors(logger log.Logger) httptransport.ServerFinalizerFunc {
 
 func ErrorEncoder(_ context.Context, err error, w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(http.StatusInternalServerError)
 
 	var response common.BaseResponse
 	{
@@ -38,6 +37,13 @@ func ErrorEncoder(_ context.Context, err error, w http.ResponseWriter) {
 			response.Data = common.ErrDataNotFound.Error()
 		case common.ErrAssertion:
 			response.Data = common.ErrAssertion.Error()
+		case common.ErrCancelled:
+			w.WriteHeader(http.StatusOK)
+			response.Data = common.ErrCancelled.Error()
+		case common.ErrLimitExceed:
+			response.Data = common.ErrLimitExceed.Error()
+		default:
+			w.WriteHeader(http.StatusInternalServerError)
 		}
 	}
 

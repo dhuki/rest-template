@@ -30,6 +30,8 @@ var (
 var (
 	ErrDataNotFound = errors.New("Data not found")
 	ErrAssertion    = errors.New("Error Assertion")
+	ErrCancelled    = errors.New("Request Cancelled")
+	ErrLimitExceed  = errors.New("Request Limit Exceeded")
 )
 
 func LoadCons(path string) error {

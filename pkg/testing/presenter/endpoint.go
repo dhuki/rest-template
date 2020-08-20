@@ -12,6 +12,7 @@ import (
 func MakeGetAllDataEndpointWithGoroutine(usecase usecase.Usecase) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		// source : https://www.ardanlabs.com/blog/2018/11/goroutine-leaks-the-forgotten-sender.html
+		// if we're using unbuffered channel it will lead to leak
 		response := make(chan common.BaseResponse, 1)
 
 		go func() {
@@ -20,7 +21,7 @@ func MakeGetAllDataEndpointWithGoroutine(usecase usecase.Usecase) endpoint.Endpo
 
 		select {
 		case <-ctx.Done():
-			return nil, nil
+			return nil, common.ErrCancelled
 		case result := <-response:
 			if result.Error != nil {
 				return nil, result.Error
