@@ -9,8 +9,8 @@ import (
 	"github.com/dhuki/rest-template/utils"
 )
 
-// in type of usecaseImpl struct we can inject functionality of dependecy
-// not directly dependency itself
+// in usecaseImpl struct we just inject functionality of dependecy (dependent to abstraction (DI (Dependency Inversion)))
+// not directly dependency itself (not dependent to lower module)
 type usecaseImpl struct {
 	TestTableRepo repo.TestTableRepo
 	Email         utils.Email
