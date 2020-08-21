@@ -11,6 +11,7 @@ import (
 	"github.com/dhuki/rest-template/common"
 	"github.com/dhuki/rest-template/config"
 	"github.com/dhuki/rest-template/middleware"
+	"github.com/dhuki/rest-template/utils"
 	"github.com/go-kit/kit/log/level"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -22,6 +23,7 @@ func main() {
 	errChan := make(chan error, 1) // buffered channel
 	dbChan := make(chan *gorm.DB)
 	bucketChan := make(chan *ratelimit.Bucket)
+	emailChan := make(chan utils.Email)
 
 	// set up logger
 	logger := config.NewLogger()
@@ -57,15 +59,22 @@ func main() {
 		bucketChan <- config.NewRateLimit()
 	}()
 
+	// set up email configuration and email util
+	go func() {
+		smtpAuth := config.NewEmail()
+		emailChan <- utils.NewEmailUtil(smtpAuth, logger)
+	}()
+
 	// set up router configuration
 	go func() {
 		db := <-dbChan
+		email := <-emailChan
 		bucketToken := <-bucketChan
 
 		router := config.NewRouter()
-
 		// set up module with dependencies
-		testing.NewServer(router.Mux, db, logger, []mux.MiddlewareFunc{ // list of needed middleware, order is matter
+		testing.NewServer(router.Mux, db, email, logger, []mux.MiddlewareFunc{
+			// list of middleware that needed, order is matter
 			handlers.CompressHandler,
 			middleware.TokenBucketLimiter(bucketToken, logger),
 		}).Start()
@@ -77,5 +86,6 @@ func main() {
 
 	level.Error(logger).Log("description", "Server error", "message", <-errChan)
 
+	// print number of goroutine that running
 	fmt.Println(runtime.NumGoroutine())
 }

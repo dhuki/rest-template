@@ -12,6 +12,7 @@ type (
 	contextKey uint
 )
 
+// cons db
 var (
 	DbUsername string
 	DbPassword string
@@ -27,6 +28,15 @@ var (
 	BaseUrl string
 )
 
+// cons email
+var (
+	EmailUsername string
+	EmailPassword string
+	EmailSmtpHost string
+	EmailSmtpPort string
+)
+
+// cons error
 var (
 	ErrDataNotFound = errors.New("Data not found")
 	ErrAssertion    = errors.New("Error Assertion")

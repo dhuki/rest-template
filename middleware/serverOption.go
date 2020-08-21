@@ -12,6 +12,7 @@ import (
 	httptransport "github.com/go-kit/kit/transport/http"
 )
 
+// function for interceptors
 func SetInterceptors(logger log.Logger) httptransport.ServerFinalizerFunc {
 	return httptransport.ServerFinalizerFunc(func(ctx context.Context, code int, r *http.Request) {
 		level.Info(logger).Log(
@@ -27,6 +28,7 @@ func SetInterceptors(logger log.Logger) httptransport.ServerFinalizerFunc {
 	})
 }
 
+// function for logging error to client
 func ErrorEncoder(_ context.Context, err error, w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
@@ -50,6 +52,7 @@ func ErrorEncoder(_ context.Context, err error, w http.ResponseWriter) {
 	json.NewEncoder(w).Encode(response)
 }
 
+// function for logging error to internal
 func ErrorHandlerFunc(logger log.Logger) transport.ErrorHandlerFunc {
 	return transport.ErrorHandlerFunc(func(_ context.Context, err error) {
 		level.Error(logger).Log(

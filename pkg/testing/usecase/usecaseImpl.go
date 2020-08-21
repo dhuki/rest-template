@@ -6,15 +6,20 @@ import (
 	"github.com/dhuki/rest-template/common"
 	"github.com/dhuki/rest-template/pkg/testing/domain/entity"
 	"github.com/dhuki/rest-template/pkg/testing/domain/repo"
+	"github.com/dhuki/rest-template/utils"
 )
 
+// in type of usecaseImpl struct we can inject functionality of dependecy
+// not directly dependency itself
 type usecaseImpl struct {
 	TestTableRepo repo.TestTableRepo
+	Email         utils.Email
 }
 
-func NewUsecase(testTableRepo repo.TestTableRepo) Usecase {
+func NewUsecase(testTableRepo repo.TestTableRepo, Email utils.Email) Usecase {
 	return usecaseImpl{
 		TestTableRepo: testTableRepo,
+		Email:         Email,
 	}
 }
 
@@ -45,6 +50,11 @@ func (u usecaseImpl) CreateData(ctx context.Context, request entity.TestTable) c
 			Error: err,
 		}
 	}
+
+	// try to send email
+	go func() {
+		u.Email.SendEmail(ctx, request)
+	}()
 
 	return common.BaseResponse{
 		Success: common.RESPONSE_SUCCESS,
