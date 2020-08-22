@@ -6,6 +6,7 @@ import (
 	"os/signal"
 	"runtime"
 	"syscall"
+	"time"
 
 	"github.com/dhuki/rest-template/cmd/testing"
 	"github.com/dhuki/rest-template/common"
@@ -24,6 +25,7 @@ func main() {
 	dbChan := make(chan *gorm.DB)
 	bucketChan := make(chan *ratelimit.Bucket)
 	emailChan := make(chan utils.Email)
+	dependenciesChan := make(chan utils.Dependencies)
 
 	// set up logger
 	logger := config.NewLogger()
@@ -43,6 +45,7 @@ func main() {
 		// SIGTERM (Signal Terminated (KILL command))
 		signal.Notify(sign, syscall.SIGTERM, syscall.SIGINT)
 		errChan <- fmt.Errorf("%s", <-sign)
+		fmt.Println("Close goroutine signal")
 	}()
 
 	// set up database configuration
@@ -52,25 +55,28 @@ func main() {
 			errChan <- err
 		}
 		dbChan <- db
+		fmt.Println("Close goroutine database")
 	}()
 
 	// set up rate limiter configuration
 	go func() {
 		bucketChan <- config.NewRateLimit()
+		fmt.Println("Close goroutine rate limiter")
 	}()
 
 	// set up email configuration and email util
 	go func() {
 		smtpAuth := config.NewEmail()
 		emailChan <- utils.NewEmailUtil(smtpAuth, logger)
+		fmt.Println("Close goroutine email")
 	}()
 
-	// set up router configuration
 	go func() {
 		db := <-dbChan
 		email := <-emailChan
 		bucketToken := <-bucketChan
 
+		// set up router configuration
 		router := config.NewRouter()
 		// set up module with dependencies
 		testing.NewServer(router.Mux, db, email, logger, []mux.MiddlewareFunc{
@@ -79,12 +85,24 @@ func main() {
 			middleware.TokenBucketLimiter(bucketToken, logger),
 		}).Start()
 
-		level.Info(logger).Log("description", fmt.Sprintf("Listen to port :%s", common.Port))
+		dependenciesChan <- utils.Dependencies{
+			GormDB: db,
+			Server: router.Server,
+		}
 
 		errChan <- router.Start()
+		fmt.Println("Close goroutine router")
 	}()
 
+	dependencies := <-dependenciesChan
+	level.Info(logger).Log("description", fmt.Sprintf("Listen to port :%s", common.Port))
 	level.Error(logger).Log("description", "Server error", "message", <-errChan)
+
+	if err := dependencies.Close(); err != nil {
+		level.Error(logger).Log("description", "Server Cannot Close Dependencies", "message", err)
+	}
+
+	time.Sleep(3 * time.Second)
 
 	// print number of goroutine that running
 	fmt.Println(runtime.NumGoroutine())

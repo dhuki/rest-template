@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"time"
 
 	"github.com/dhuki/rest-template/common"
 	"github.com/dhuki/rest-template/pkg/testing/domain/entity"
@@ -27,7 +28,7 @@ func NewUsecase(testTableRepo repo.TestTableRepo, Email utils.Email) Usecase {
 func (u usecaseImpl) GetAllData(ctx context.Context) common.BaseResponse {
 	var response common.BaseResponse
 	{
-		// time.Sleep(3 * time.Second)
+		time.Sleep(3 * time.Second)
 		testTables, err := u.TestTableRepo.GetAll(ctx)
 		if err != nil {
 			return common.BaseResponse{

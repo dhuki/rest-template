@@ -39,12 +39,12 @@ func NewDatabase() (*gorm.DB, error) {
 	// it will force to wait until at least one connection idle
 	// by default postgres set max 100 connection if there is one connection want to establish
 	// it will return "pq: sorry, too many clients already".
-	sqlDB.SetMaxOpenConns(10)
+	sqlDB.SetMaxOpenConns(3)
 
 	// Set maxidle connection that retained
-	// it set to 5, so there are 5 retained connection to db
-	// and the other 5 is not retain connection it will close connection if not use
-	sqlDB.SetMaxIdleConns(5)
+	// if it set to 5, so there are 5 retained connection to db
+	// and the other 5 is not retain connection it will close connection after used
+	sqlDB.SetMaxIdleConns(3)
 
 	// Set maximum lifetime of connection before retiring it.
 	// if idle connection has been reached max lifetime it'll destroy connection
