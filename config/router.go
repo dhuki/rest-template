@@ -36,7 +36,8 @@ func (r router) Start() error {
 	srv := &http.Server{
 		Handler:      wireWithCors(r),
 		Addr:         fmt.Sprintf("%s:%s", common.Host, common.Port),
-		WriteTimeout: time.Second * 5,
+		ReadTimeout:  time.Second * 5, // time for read request header to request body (if exist)
+		WriteTimeout: time.Second * 10,
 	}
 	return srv.ListenAndServe()
 }

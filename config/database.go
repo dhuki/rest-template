@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/dhuki/rest-template/common"
 	"gorm.io/driver/postgres"
@@ -22,6 +23,34 @@ func NewDatabase() (*gorm.DB, error) {
 	}
 	// disable auto logging from gorm lib v1
 	// db.LogMode(false)
+
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, err
+	}
+
+	// checking if connection to db is still alive
+	if err := sqlDB.Ping(); err != nil {
+		return nil, err
+	}
+
+	// Set maxActive (maximum number of active/connection (in-use or idle) ) that available in pool
+	// if all connection already in-use (in this case 10 connection in-use) and need new connection
+	// it will force to wait until at least one connection idle
+	// by default postgres set max 100 connection if there is one connection want to establish
+	// it will return "pq: sorry, too many clients already".
+	sqlDB.SetMaxOpenConns(10)
+
+	// Set maxidle connection that retained
+	// it set to 5, so there are 5 retained connection to db
+	// and the other 5 is not retain connection it will close connection if not use
+	sqlDB.SetMaxIdleConns(5)
+
+	// Set maximum lifetime of connection before retiring it.
+	// if idle connection has been reached max lifetime it'll destroy connection
+	// but otherwise if connection is in use it'll wait until connection back again to the
+	// pool and then destory it.
+	sqlDB.SetConnMaxLifetime(10 * time.Minute)
 
 	return db, nil
 }
