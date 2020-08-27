@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"time"
 
 	"github.com/dhuki/rest-template/common"
 	"github.com/dhuki/rest-template/pkg/testing/domain/entity"
@@ -15,20 +14,20 @@ import (
 // not directly dependency itself (not dependent to lower module)
 type usecaseImpl struct {
 	TestTableRepo repo.TestTableRepo
-	Email         utils.Email
+	Utils         *utils.Utils
 }
 
-func NewUsecase(testTableRepo repo.TestTableRepo, Email utils.Email) Usecase {
+func NewUsecase(testTableRepo repo.TestTableRepo, utils *utils.Utils) Usecase {
 	return usecaseImpl{
 		TestTableRepo: testTableRepo,
-		Email:         Email,
+		Utils:         utils,
 	}
 }
 
 func (u usecaseImpl) GetAllData(ctx context.Context) common.BaseResponse {
 	var response common.BaseResponse
 	{
-		time.Sleep(3 * time.Second)
+		// time.Sleep(3 * time.Second)
 		testTables, err := u.TestTableRepo.GetAll(ctx)
 		if err != nil {
 			return common.BaseResponse{
@@ -55,7 +54,7 @@ func (u usecaseImpl) CreateData(ctx context.Context, request entity.TestTable) c
 
 	// try to send email
 	go func() {
-		u.Email.SendEmail(ctx, request)
+		u.Utils.SendEmail(ctx, request)
 	}()
 
 	return common.BaseResponse{

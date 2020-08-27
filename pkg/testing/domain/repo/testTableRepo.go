@@ -10,5 +10,7 @@ import (
 
 type TestTableRepo interface {
 	GetAll(context.Context) ([]entity.TestTable, error)
+	Get(context.Context) (entity.TestTable, error)
+	GetByName(context.Context, string) (entity.TestTable, error)
 	Create(context.Context, entity.TestTable) error
 }

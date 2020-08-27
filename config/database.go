@@ -1,6 +1,7 @@
 package config
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -51,6 +52,20 @@ func NewDatabase() (*gorm.DB, error) {
 	// but otherwise if connection is in use it'll wait until connection back again to the
 	// pool and then destory it.
 	sqlDB.SetConnMaxLifetime(10 * time.Minute)
+
+	return db, nil
+}
+
+func NewTesting(sql *sql.DB) (*gorm.DB, error) {
+	// dbURI := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable TimeZone=Asia/Jakarta", common.DbHost, common.DbPort, common.DbName, common.DbUsername, common.DbPassword)
+	db, err := gorm.Open(postgres.New(postgres.Config{
+		Conn: sql,
+	}), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	}) // configuration gorm v2 (it's unstable yet)
+	if err != nil {
+		return nil, err
+	}
 
 	return db, nil
 }

@@ -11,20 +11,20 @@ import (
 	"github.com/dhuki/rest-template/cmd/testing"
 	"github.com/dhuki/rest-template/common"
 	"github.com/dhuki/rest-template/config"
-	"github.com/dhuki/rest-template/middleware"
 	"github.com/dhuki/rest-template/utils"
 	"github.com/go-kit/kit/log/level"
+	"github.com/go-redis/redis/v8"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/juju/ratelimit"
 	"gorm.io/gorm"
 )
 
 func main() {
 	errChan := make(chan error, 1) // buffered channel
 	dbChan := make(chan *gorm.DB)
-	bucketChan := make(chan *ratelimit.Bucket)
+	// bucketChan := make(chan *ratelimit.Bucket)
 	emailChan := make(chan utils.Email)
+	redisChan := make(chan *redis.Client)
 	dependenciesChan := make(chan utils.Dependencies)
 
 	// set up logger
@@ -58,11 +58,17 @@ func main() {
 		fmt.Println("Close goroutine database")
 	}()
 
-	// set up rate limiter configuration
+	// set up redis cache
 	go func() {
-		bucketChan <- config.NewRateLimit()
-		fmt.Println("Close goroutine rate limiter")
+		redisChan <- config.NewRedis()
+		fmt.Println("Close goroutine redis")
 	}()
+
+	// set up rate limiter configuration
+	// go func() {
+	// 	bucketChan <- config.NewRateLimit()
+	// 	fmt.Println("Close goroutine rate limiter")
+	// }()
 
 	// set up email configuration and email util
 	go func() {
@@ -74,20 +80,26 @@ func main() {
 	go func() {
 		db := <-dbChan
 		email := <-emailChan
-		bucketToken := <-bucketChan
+		// bucketToken := <-bucketChan
+		redisClient := <-redisChan
 
 		// set up router configuration
 		router := config.NewRouter()
 		// set up module with dependencies
-		testing.NewServer(router.Mux, db, email, logger, []mux.MiddlewareFunc{
-			// list of middleware that needed, order is matter
-			handlers.CompressHandler,
-			middleware.TokenBucketLimiter(bucketToken, logger),
-		}).Start()
+		testing.NewServer(router.Mux, redisClient, logger).
+			AddDatabase(db).
+			AddUtils(utils.NewUtils().
+				WireWithEmail(email)).
+			AddMiddlewares([]mux.MiddlewareFunc{
+				// list of middleware that needed, order is matter
+				handlers.CompressHandler,
+				// middleware.TokenBucketLimiter(bucketToken, logger),
+			}).Build().Start()
 
 		dependenciesChan <- utils.Dependencies{
-			GormDB: db,
-			Server: router.Server,
+			GormDB:      db,
+			Server:      router.Server,
+			RedisClient: redisClient,
 		}
 
 		errChan <- router.Start()

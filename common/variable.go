@@ -21,6 +21,12 @@ var (
 	DbHost     string
 )
 
+// cons redis
+var (
+	RedisHost string
+	RedisPort string
+)
+
 // cons url
 var (
 	Host    string
@@ -63,6 +69,9 @@ func LoadCons(path string) error {
 	DbName = os.Getenv("db.name")
 	DbPort = os.Getenv("db.port")
 	DbHost = os.Getenv("db.host")
+
+	RedisHost = os.Getenv("redis.host")
+	RedisPort = os.Getenv("redis.port")
 
 	return nil
 }

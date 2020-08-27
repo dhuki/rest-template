@@ -6,6 +6,7 @@ import (
 	"github.com/dhuki/rest-template/pkg/testing/usecase"
 	"github.com/dhuki/rest-template/utils"
 	"github.com/go-kit/kit/log"
+	"github.com/go-redis/redis/v8"
 	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 )
@@ -17,26 +18,44 @@ type server interface {
 type testingServer struct {
 	mux         *mux.Router
 	db          *gorm.DB
-	email       utils.Email
+	redisClient *redis.Client
 	middlewares []mux.MiddlewareFunc
+	utils       *utils.Utils
 	logger      log.Logger
 }
 
-func NewServer(mux *mux.Router, db *gorm.DB, email utils.Email, logger log.Logger, middlewares []mux.MiddlewareFunc) server {
+func NewServer(mux *mux.Router, redisClient *redis.Client, logger log.Logger) testingServer {
 	return testingServer{
 		mux:         mux,
-		db:          db,
-		email:       email,
+		redisClient: redisClient,
 		logger:      logger,
-		middlewares: middlewares,
 	}
+}
+
+func (t testingServer) AddDatabase(db *gorm.DB) testingServer {
+	t.db = db
+	return t
+}
+
+func (t testingServer) AddUtils(utils *utils.Utils) testingServer {
+	t.utils = utils
+	return t
+}
+
+func (t testingServer) AddMiddlewares(middlewares []mux.MiddlewareFunc) testingServer {
+	t.middlewares = middlewares
+	return t
+}
+
+func (t testingServer) Build() server {
+	return t
 }
 
 func (t testingServer) Start() {
 	var srv usecase.Usecase
 	{
 		infrastructure := infrastructure.NewTestTableInfrastructure(t.db)
-		srv = usecase.NewUsecase(infrastructure, t.email)
+		srv = usecase.NewUsecase(infrastructure, t.utils)
 	}
 
 	presenter.NewServer(t.mux, srv, t.logger, t.middlewares)
