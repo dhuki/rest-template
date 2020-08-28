@@ -20,15 +20,14 @@ type testingServer struct {
 	db          *gorm.DB
 	redisClient *redis.Client
 	middlewares []mux.MiddlewareFunc
-	utils       *utils.Utils
+	utils       utils.Utils
 	logger      log.Logger
 }
 
-func NewServer(mux *mux.Router, redisClient *redis.Client, logger log.Logger) testingServer {
+func NewServer(mux *mux.Router, redisClient *redis.Client) testingServer {
 	return testingServer{
 		mux:         mux,
 		redisClient: redisClient,
-		logger:      logger,
 	}
 }
 
@@ -37,7 +36,7 @@ func (t testingServer) AddDatabase(db *gorm.DB) testingServer {
 	return t
 }
 
-func (t testingServer) AddUtils(utils *utils.Utils) testingServer {
+func (t testingServer) AddUtils(utils utils.Utils) testingServer {
 	t.utils = utils
 	return t
 }
@@ -47,16 +46,22 @@ func (t testingServer) AddMiddlewares(middlewares []mux.MiddlewareFunc) testingS
 	return t
 }
 
+func (t testingServer) AddLogger(logger log.Logger) testingServer {
+	t.logger = logger
+	return t
+}
+
 func (t testingServer) Build() server {
 	return t
 }
 
 func (t testingServer) Start() {
-	var srv usecase.Usecase
-	{
-		infrastructure := infrastructure.NewTestTableInfrastructure(t.db)
-		srv = usecase.NewUsecase(infrastructure, t.utils)
-	}
-
-	presenter.NewServer(t.mux, srv, t.logger, t.middlewares)
+	presenter.NewHttpHandler(
+		t.mux,
+		usecase.UsecaseImpl{
+			TestTableRepo: infrastructure.NewTestTableInfrastructure(t.db),
+			Utils:         t.utils,
+		},
+		t.middlewares,
+		t.logger)
 }

@@ -73,7 +73,7 @@ func (s emailUtil) SendEmail(ctx context.Context, data entity.TestTable) error {
 	smtpAddr := fmt.Sprint(common.EmailSmtpHost, ":", common.EmailSmtpPort)
 	msg, err := s.makeContentMsg(data)
 	if err != nil {
-		return err
+		return level.Error(s.logger).Log("description", "send email", "message", err)
 	}
 
 	// receiver email but it will insert it to bcc (means he get copy but another recipent doens't know)

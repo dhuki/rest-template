@@ -8,6 +8,6 @@ package entity
 // pacakge for defined mapping database
 type TestTable struct {
 	ID          int    `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	Name        string `json:"name" faker:"name"`
+	Description string `json:"description" faker:"url"`
 }

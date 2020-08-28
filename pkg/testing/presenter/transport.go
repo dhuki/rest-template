@@ -2,14 +2,14 @@ package presenter
 
 import (
 	"github.com/dhuki/rest-template/middleware"
-	"github.com/dhuki/rest-template/pkg/testing/presenter/model"
+	"github.com/dhuki/rest-template/pkg/testing/presenter/reqres"
 	"github.com/dhuki/rest-template/pkg/testing/usecase"
 	"github.com/go-kit/kit/log"
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
 )
 
-func NewServer(mux *mux.Router, usecase usecase.Usecase, logger log.Logger, middlewares []mux.MiddlewareFunc) {
+func NewHttpHandler(mux *mux.Router, usecase usecase.Usecase, middlewares []mux.MiddlewareFunc, logger log.Logger) {
 	r := mux.PathPrefix("/api").Subrouter()
 	// r.Use(middleware.SetContentTypeToJson) // by default go-kit provided function to response as json
 	// r.Use(middleware.SetInterceptors(logger)) // by default there go-kit provided "ServerFinalizerFunc" for logging request
@@ -48,7 +48,7 @@ func NewServer(mux *mux.Router, usecase usecase.Usecase, logger log.Logger, midd
 
 	r.Methods("POST").Path("/testing").Handler(httptransport.NewServer(
 		MakeCreateDataEndpoint(usecase),
-		model.DecodeCreateRequest, // request need to be decoded
+		reqres.DecodeCreateRequest, // request need to be decoded
 		httptransport.EncodeJSONResponse,
 		options...,
 	))

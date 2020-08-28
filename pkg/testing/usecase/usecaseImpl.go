@@ -12,19 +12,21 @@ import (
 // in usecaseImpl struct we just inject functionality of dependecy (dependent to abstraction (DI (Dependency Inversion)))
 // to make it plug and play
 // not directly dependency itself (not dependent to lower module)
-type usecaseImpl struct {
+type UsecaseImpl struct {
 	TestTableRepo repo.TestTableRepo
-	Utils         *utils.Utils
+	Utils         utils.Utils
 }
 
-func NewUsecase(testTableRepo repo.TestTableRepo, utils *utils.Utils) Usecase {
-	return usecaseImpl{
-		TestTableRepo: testTableRepo,
-		Utils:         utils,
-	}
-}
+// mat ryer style just pass few argument as paramater to any kind func
+// restrict it two max 3 argument
+// func NewUsecase(testTableRepo repo.TestTableRepo, utils utils.Utils) Usecase {
+// 	return UsecaseImpl{
+// 		testTableRepo: testTableRepo,
+// 		utils:         utils,
+// 	}
+// }
 
-func (u usecaseImpl) GetAllData(ctx context.Context) common.BaseResponse {
+func (u UsecaseImpl) GetAllData(ctx context.Context) common.BaseResponse {
 	var response common.BaseResponse
 	{
 		// time.Sleep(3 * time.Second)
@@ -43,7 +45,7 @@ func (u usecaseImpl) GetAllData(ctx context.Context) common.BaseResponse {
 	return response
 }
 
-func (u usecaseImpl) CreateData(ctx context.Context, request entity.TestTable) common.BaseResponse {
+func (u UsecaseImpl) CreateData(ctx context.Context, request entity.TestTable) common.BaseResponse {
 
 	err := u.TestTableRepo.Create(ctx, request)
 	if err != nil {

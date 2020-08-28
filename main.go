@@ -86,7 +86,7 @@ func main() {
 		// set up router configuration
 		router := config.NewRouter()
 		// set up module with dependencies
-		testing.NewServer(router.Mux, redisClient, logger).
+		testing.NewServer(router.Mux, redisClient).
 			AddDatabase(db).
 			AddUtils(utils.NewUtils().
 				WireWithEmail(email)).
@@ -94,7 +94,7 @@ func main() {
 				// list of middleware that needed, order is matter
 				handlers.CompressHandler,
 				// middleware.TokenBucketLimiter(bucketToken, logger),
-			}).Build().Start()
+			}).AddLogger(logger).Build().Start()
 
 		dependenciesChan <- utils.Dependencies{
 			GormDB:      db,
