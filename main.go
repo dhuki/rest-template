@@ -40,9 +40,9 @@ func main() {
 
 	// setup command kill and interrupt
 	go func() {
-		sign := make(chan os.Signal) // buffered channel
+		sign := make(chan os.Signal, 1) // buffered channel
 		// SIGINT (Signal Interrupt (CTRL + C))
-		// SIGTERM (Signal Terminated (KILL command))
+		// SIGTERM (Signal Terminated (KILL command)) unlike SIGKILL, this signal can be blocked, handled, and ignored
 		signal.Notify(sign, syscall.SIGTERM, syscall.SIGINT)
 		errChan <- fmt.Errorf("%s", <-sign)
 		fmt.Println("Close goroutine signal")
@@ -103,6 +103,7 @@ func main() {
 		}
 
 		errChan <- router.Start()
+		router.GetListRouterAvailable()
 		fmt.Println("Close goroutine router")
 	}()
 

@@ -46,7 +46,6 @@ func (u UsecaseImpl) GetAllData(ctx context.Context) common.BaseResponse {
 }
 
 func (u UsecaseImpl) CreateData(ctx context.Context, request entity.TestTable) common.BaseResponse {
-
 	err := u.TestTableRepo.Create(ctx, request)
 	if err != nil {
 		return common.BaseResponse{
@@ -63,6 +62,38 @@ func (u UsecaseImpl) CreateData(ctx context.Context, request entity.TestTable) c
 		Success: common.RESPONSE_SUCCESS,
 		Message: common.RESPONSE_MSG_SUCCESS,
 		Data:    nil,
+		Error:   nil,
+	}
+}
+
+func (u UsecaseImpl) GetDataByParam(ctx context.Context, request entity.TestTable) common.BaseResponse {
+	testTable, err := u.TestTableRepo.Get(ctx, request.ID)
+	if err != nil {
+		return common.BaseResponse{
+			Error: err,
+		}
+	}
+
+	return common.BaseResponse{
+		Success: common.RESPONSE_SUCCESS,
+		Message: common.RESPONSE_MSG_SUCCESS,
+		Data:    testTable,
+		Error:   nil,
+	}
+}
+
+func (u UsecaseImpl) GetDataByPath(ctx context.Context, request entity.TestTable) common.BaseResponse {
+	testTable, err := u.TestTableRepo.Get(ctx, request.ID)
+	if err != nil {
+		return common.BaseResponse{
+			Error: err,
+		}
+	}
+
+	return common.BaseResponse{
+		Success: common.RESPONSE_SUCCESS,
+		Message: common.RESPONSE_MSG_SUCCESS,
+		Data:    testTable,
 		Error:   nil,
 	}
 }

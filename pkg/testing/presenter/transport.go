@@ -1,6 +1,8 @@
 package presenter
 
 import (
+	"net/http"
+
 	"github.com/dhuki/rest-template/middleware"
 	"github.com/dhuki/rest-template/pkg/testing/presenter/reqres"
 	"github.com/dhuki/rest-template/pkg/testing/usecase"
@@ -23,30 +25,32 @@ func NewHttpHandler(mux *mux.Router, usecase usecase.Usecase, middlewares []mux.
 		httptransport.ServerFinalizer(middleware.SetInterceptors(logger)),     // executed at the end of every HTTP request.
 	}
 
-	r.Methods("GET").Path("/testing").Handler(httptransport.NewServer(
+	// order matter in mux match router
+	
+	r.Methods(http.MethodGet).Path("/testing/{param}").Handler(httptransport.NewServer(
+		MakeGetDataByPathEndpointWithGoroutine(usecase),
+		reqres.DecodeGetByPathRequest,
+		httptransport.EncodeJSONResponse,
+		options...,
+	))
+
+	r.Methods(http.MethodGet).Path("/testing").Queries(
+		"param", "{param:[0-9]+}", // [0-9]+ match all number
+	).Handler(httptransport.NewServer(
+		MakeGetDataByParamEndpointWithGoroutine(usecase),
+		reqres.DecodeGetByParamRequest,
+		httptransport.EncodeJSONResponse,
+		options...,
+	))
+
+	r.Methods(http.MethodGet).Path("/testing").Handler(httptransport.NewServer(
 		MakeGetAllDataEndpointWithGoroutine(usecase),
 		httptransport.NopRequestDecoder,  // go-kit provided requests that do not need to be decoded
 		httptransport.EncodeJSONResponse, // go-kit provided response to be encoded to json and add req header as content-type json
 		options...,
 	))
 
-	r.Methods("GET").Path("/testing/{param}").Handler(httptransport.NewServer(
-		MakeGetAllDataEndpointWithGoroutine(usecase),
-		httptransport.NopRequestDecoder,
-		httptransport.EncodeJSONResponse,
-		options...,
-	))
-
-	r.Methods("GET").Path("/testing").Queries(
-		"param", "{param}",
-	).Handler(httptransport.NewServer(
-		MakeGetAllDataEndpointWithGoroutine(usecase),
-		httptransport.NopRequestDecoder,
-		httptransport.EncodeJSONResponse,
-		options...,
-	))
-
-	r.Methods("POST").Path("/testing").Handler(httptransport.NewServer(
+	r.Methods(http.MethodPost).Path("/testing").Handler(httptransport.NewServer(
 		MakeCreateDataEndpoint(usecase),
 		reqres.DecodeCreateRequest, // request need to be decoded
 		httptransport.EncodeJSONResponse,

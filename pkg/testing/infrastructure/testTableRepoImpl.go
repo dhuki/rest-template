@@ -32,12 +32,12 @@ func (t testTableRepoImpl) GetAll(ctx context.Context) ([]entity.TestTable, erro
 	return testTables, nil
 }
 
-func (t testTableRepoImpl) Get(ctx context.Context) (entity.TestTable, error) {
+func (t testTableRepoImpl) Get(ctx context.Context, id int) (entity.TestTable, error) {
 	testTables := entity.TestTable{
-		ID: 1,
+		ID: id,
 	}
 	// db := t.db.Find(&testTables) // this is ver1 of gorm cannot use context
-	db := t.db.WithContext(ctx).Find(&testTables) // this is ver2 of gorm, we can use context to provide cancellation propagation
+	db := t.db.WithContext(ctx).Take(&testTables, id) // only work with int of type primary key
 	if db.Error != nil {
 		return testTables, db.Error
 	}

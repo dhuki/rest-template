@@ -48,3 +48,53 @@ func MakeCreateDataEndpoint(usecase usecase.Usecase) endpoint.Endpoint {
 		return response, response.Error
 	}
 }
+
+func MakeGetDataByParamEndpointWithGoroutine(usecase usecase.Usecase) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		testTable, ok := request.(entity.TestTable)
+		if !ok {
+			return nil, common.ErrAssertion
+		}
+
+		responseChan := make(chan common.BaseResponse, 1)
+
+		go func() {
+			responseChan <- usecase.GetDataByParam(ctx, testTable)
+		}()
+
+		select {
+		case <-ctx.Done():
+			return nil, common.ErrCancelled
+		case response := <-responseChan:
+			if response.Error != nil {
+				return nil, response.Error
+			}
+			return response, nil
+		}
+	}
+}
+
+func MakeGetDataByPathEndpointWithGoroutine(usecase usecase.Usecase) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		testTable, ok := request.(entity.TestTable)
+		if !ok {
+			return nil, common.ErrAssertion
+		}
+
+		responseChan := make(chan common.BaseResponse, 1)
+
+		go func() {
+			responseChan <- usecase.GetDataByPath(ctx, testTable)
+		}()
+
+		select {
+		case <-ctx.Done():
+			return nil, common.ErrCancelled
+		case response := <-responseChan:
+			if response.Error != nil {
+				return nil, response.Error
+			}
+			return response, nil
+		}
+	}
+}

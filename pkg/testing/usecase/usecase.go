@@ -9,5 +9,7 @@ import (
 
 type Usecase interface {
 	GetAllData(context.Context) common.BaseResponse
+	GetDataByParam(context.Context, entity.TestTable) common.BaseResponse
+	GetDataByPath(context.Context, entity.TestTable) common.BaseResponse
 	CreateData(context.Context, entity.TestTable) common.BaseResponse
 }

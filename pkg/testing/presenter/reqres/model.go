@@ -4,8 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strconv"
 
+	"github.com/dhuki/rest-template/common"
 	"github.com/dhuki/rest-template/pkg/testing/domain/entity"
+	"github.com/gorilla/mux"
 )
 
 func DecodeCreateRequest(ctx context.Context, r *http.Request) (interface{}, error) {
@@ -14,5 +17,43 @@ func DecodeCreateRequest(ctx context.Context, r *http.Request) (interface{}, err
 	if err != nil {
 		return nil, err
 	}
+	return request, nil
+}
+
+func DecodeGetByParamRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	vars := mux.Vars(r)
+	if data, ok := vars["param"]; !ok && data == "" {
+		return nil, common.ErrDataNotFound
+	}
+
+	var request entity.TestTable
+	{
+		id, err := strconv.Atoi(vars["param"])
+		if err != nil {
+			return nil, err
+		}
+
+		request.ID = id
+	}
+
+	return request, nil
+}
+
+func DecodeGetByPathRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	vars := mux.Vars(r)
+	if data, ok := vars["param"]; !ok && data == "" {
+		return nil, common.ErrDataNotFound
+	}
+
+	var request entity.TestTable
+	{
+		id, err := strconv.Atoi(vars["param"])
+		if err != nil {
+			return nil, err
+		}
+
+		request.ID = id
+	}
+
 	return request, nil
 }

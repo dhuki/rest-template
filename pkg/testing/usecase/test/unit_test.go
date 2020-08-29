@@ -2,7 +2,6 @@ package test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/bxcodec/faker"
@@ -13,6 +12,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// command to get coverprofile if test in different package
+// go test -coverpkg ./... ./test -coverprofile ./test/coverage.out
+// to show in html format
+// go tool cover -html=cp.out
+
 func TestGetAllData(t *testing.T) {
 	mockRepo := new(MockTestTableRepo)
 	mockEmail := new(MockEmail)
@@ -20,11 +24,7 @@ func TestGetAllData(t *testing.T) {
 	utils := utils.NewUtils().WireWithEmail(mockEmail)
 
 	var data entity.TestTable
-	err := faker.FakeData(&data)
-	if err != nil {
-		t.Errorf("%s", assert.AnError)
-		return
-	}
+	assert.Nil(t, faker.FakeData(&data))
 
 	mockRepo.On("GetAll", context.TODO()).Return([]entity.TestTable{data}, nil)
 
@@ -33,6 +33,7 @@ func TestGetAllData(t *testing.T) {
 		Utils:         utils,
 	}
 	actual := usecase.GetAllData(context.TODO())
+	assert.Nil(t, actual.Error)
 
 	expected := common.BaseResponse{
 		Success: true,
@@ -41,6 +42,66 @@ func TestGetAllData(t *testing.T) {
 		Error:   nil,
 	}
 
-	fmt.Println(data)
-	assert.Equal(t, actual, expected, "it's supposed to same")
+	assert.Equal(t, expected, actual, "it's supposed to be same")
+}
+
+func TestGetDataByParam(t *testing.T) {
+	mockRepo := new(MockTestTableRepo)
+	mockEmail := new(MockEmail)
+	mockUtils := utils.NewUtils().WireWithEmail(mockEmail)
+
+	var expected entity.TestTable
+	assert.Nil(t, faker.FakeData(&expected))
+
+	mockRepo.On("Get", context.TODO(), expected.ID).Return(expected, nil)
+
+	usecase := usecase.UsecaseImpl{
+		TestTableRepo: mockRepo,
+		Utils:         mockUtils,
+	}
+
+	actual := usecase.GetDataByParam(context.TODO(), expected)
+	assert.Nil(t, actual.Error)
+
+	assert.Equal(t, expected, actual.Data, "it's supposed to be same")
+}
+
+func TestGetDataByPath(t *testing.T) {
+	mockRepo := new(MockTestTableRepo)
+	mockEmail := new(MockEmail)
+	mockUtils := utils.NewUtils().WireWithEmail(mockEmail)
+
+	var expected entity.TestTable
+	assert.Nil(t, faker.FakeData(&expected))
+
+	mockRepo.On("Get", context.TODO(), expected.ID).Return(expected, nil)
+
+	usecase := usecase.UsecaseImpl{
+		TestTableRepo: mockRepo,
+		Utils:         mockUtils,
+	}
+
+	actual := usecase.GetDataByPath(context.TODO(), expected)
+	assert.Nil(t, actual.Error)
+
+	assert.Equal(t, expected, actual.Data, "it's supposed to be same")
+}
+
+func TestCreateData(t *testing.T) {
+	mockRepo := new(MockTestTableRepo)
+	mockEmail := new(MockEmail)
+	mockUtils := utils.NewUtils().WireWithEmail(mockEmail)
+
+	var request entity.TestTable
+	assert.Nil(t, faker.FakeData(&request))
+
+	mockRepo.On("Create", context.TODO(), request).Return(nil)
+
+	usecase := usecase.UsecaseImpl{
+		TestTableRepo: mockRepo,
+		Utils:         mockUtils,
+	}
+
+	actual := usecase.CreateData(context.TODO(), request)
+	assert.Nil(t, actual.Error)
 }
