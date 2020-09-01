@@ -18,7 +18,7 @@ func NewDatabase() (*gorm.DB, error) {
 	dbURI := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=disable TimeZone=Asia/Jakarta", common.DbHost, common.DbPort, common.DbName, common.DbUsername, common.DbPassword)
 	db, err := gorm.Open(postgres.Open(dbURI), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Silent), // disable auto log gorm v2
-	}) // configuration gorm v2 (it's unstable yet)
+	}) // configuration gorm v2 (already release on 28 Aug 2020) src : https://gorm.io/docs/v2_release_note.html
 	if err != nil {
 		return nil, err
 	}

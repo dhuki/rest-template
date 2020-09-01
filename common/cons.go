@@ -1,6 +1,7 @@
 package common
 
 const ENV_PATH = "./.env"
+
 // testing should use fullpath if want to load file
 const ENV_PATH_TESTING = "C:\\Users\\pricy\\go\\src\\github.com\\rest-template\\.env"
 

@@ -36,7 +36,6 @@ func (t testTableRepoImpl) Get(ctx context.Context, id int) (entity.TestTable, e
 	testTables := entity.TestTable{
 		ID: id,
 	}
-	// db := t.db.Find(&testTables) // this is ver1 of gorm cannot use context
 	db := t.db.WithContext(ctx).Take(&testTables, id) // only work with int of type primary key
 	if db.Error != nil {
 		return testTables, db.Error

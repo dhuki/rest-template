@@ -19,7 +19,6 @@ func SetInterceptors(logger log.Logger) httptransport.ServerFinalizerFunc {
 			"description", "Interceptors",
 			"scheme", ctx.Value(httptransport.ContextKeyRequestProto),
 			"host", ctx.Value(httptransport.ContextKeyRequestHost),
-			"URI", ctx.Value(httptransport.ContextKeyRequestURI),
 			"path", ctx.Value(httptransport.ContextKeyRequestPath),
 			"method", ctx.Value(httptransport.ContextKeyRequestMethod),
 			"statusCode", code)

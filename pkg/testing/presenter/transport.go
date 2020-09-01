@@ -26,7 +26,7 @@ func NewHttpHandler(mux *mux.Router, usecase usecase.Usecase, middlewares []mux.
 	}
 
 	// order matter in mux match router
-	
+
 	r.Methods(http.MethodGet).Path("/testing/{param}").Handler(httptransport.NewServer(
 		MakeGetDataByPathEndpointWithGoroutine(usecase),
 		reqres.DecodeGetByPathRequest,
@@ -52,7 +52,7 @@ func NewHttpHandler(mux *mux.Router, usecase usecase.Usecase, middlewares []mux.
 
 	r.Methods(http.MethodPost).Path("/testing").Handler(httptransport.NewServer(
 		MakeCreateDataEndpoint(usecase),
-		reqres.DecodeCreateRequest, // request need to be decoded
+		middleware.LogRequestBody(reqres.DecodeCreateRequest, logger), // request need to be decoded
 		httptransport.EncodeJSONResponse,
 		options...,
 	))

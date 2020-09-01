@@ -18,7 +18,7 @@ type UsecaseImpl struct {
 }
 
 // mat ryer style just pass few argument as paramater to any kind func
-// restrict it two max 3 argument
+// restrict it to max 3 argument
 // func NewUsecase(testTableRepo repo.TestTableRepo, utils utils.Utils) Usecase {
 // 	return UsecaseImpl{
 // 		testTableRepo: testTableRepo,
