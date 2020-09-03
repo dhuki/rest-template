@@ -27,5 +27,6 @@ func (d Dependencies) Close() error {
 	if err := d.RedisClient.Close(); err != nil {
 		return err
 	}
+
 	return nil
 }

@@ -22,4 +22,5 @@ require (
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
 	gorm.io/driver/postgres v1.0.0
 	gorm.io/gorm v1.20.0
+	github.com/elastic/go-elasticsearch/v7 v7.5.1-0.20200901131549-728cc2ee3022
 )

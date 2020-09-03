@@ -9,8 +9,7 @@ import (
 	"github.com/dhuki/rest-template/common"
 	"github.com/dhuki/rest-template/config"
 	"github.com/dhuki/rest-template/pkg/testing/domain/entity"
-	"github.com/dhuki/rest-template/pkg/testing/domain/repo"
-	"github.com/dhuki/rest-template/pkg/testing/infrastructure"
+	"github.com/dhuki/rest-template/pkg/testing/infrastructure/command"
 )
 
 // this is testing with real connection database
@@ -20,7 +19,7 @@ import (
 // to show in html format
 // go tool cover -html=cp.out
 
-var testTableRepo repo.TestTableRepo
+var testTableRepo command.TestTableCommand
 
 func TestMain(m *testing.M) {
 	err := common.LoadCons(common.ENV_PATH_TESTING)
@@ -35,7 +34,7 @@ func TestMain(m *testing.M) {
 		return
 	}
 
-	testTableRepo = infrastructure.NewTestTableInfrastructure(db)
+	testTableRepo = command.NewTestTableCommand(db)
 
 	os.Exit(m.Run())
 }

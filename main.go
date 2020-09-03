@@ -12,6 +12,7 @@ import (
 	"github.com/dhuki/rest-template/common"
 	"github.com/dhuki/rest-template/config"
 	"github.com/dhuki/rest-template/utils"
+	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/go-kit/kit/log/level"
 	"github.com/go-redis/redis/v8"
 	"github.com/gorilla/handlers"
@@ -25,6 +26,7 @@ func main() {
 	// bucketChan := make(chan *ratelimit.Bucket)
 	emailChan := make(chan utils.Email)
 	redisChan := make(chan *redis.Client)
+	elasticlientChan := make(chan *elasticsearch.Client)
 	dependenciesChan := make(chan utils.Dependencies)
 
 	// set up logger
@@ -64,6 +66,16 @@ func main() {
 		fmt.Println("Close goroutine redis")
 	}()
 
+	// set up elasticsearch
+	go func() {
+		elasticlient, err := config.NewElasticsearch()
+		if err != nil {
+			errChan <- err
+		}
+		elasticlientChan <- elasticlient
+		fmt.Println("Close goroutine elasticsearch	")
+	}()
+
 	// set up rate limiter configuration
 	// go func() {
 	// 	bucketChan <- config.NewRateLimit()
@@ -82,12 +94,13 @@ func main() {
 		email := <-emailChan
 		// bucketToken := <-bucketChan
 		redisClient := <-redisChan
+		elasticlient := <-elasticlientChan
 
 		// set up router configuration
 		router := config.NewRouter()
 		// set up module with dependencies
-		testing.NewServer(router.Mux, redisClient).
-			AddDatabase(db).
+		testing.NewServer(router.Mux).
+			AddPersistent(db, elasticlient, redisClient).
 			AddUtils(utils.NewUtils().
 				WireWithEmail(email)).
 			AddMiddlewares([]mux.MiddlewareFunc{
@@ -103,7 +116,7 @@ func main() {
 		}
 
 		errChan <- router.Start()
-		router.GetListRouterAvailable()
+		// router.GetListRouterAvailable()
 		fmt.Println("Close goroutine router")
 	}()
 

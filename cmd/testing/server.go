@@ -1,10 +1,13 @@
 package testing
 
 import (
-	"github.com/dhuki/rest-template/pkg/testing/infrastructure"
+	"github.com/dhuki/rest-template/pkg/testing/domain/repo"
+	"github.com/dhuki/rest-template/pkg/testing/infrastructure/command"
+	"github.com/dhuki/rest-template/pkg/testing/infrastructure/query"
 	"github.com/dhuki/rest-template/pkg/testing/presenter"
 	"github.com/dhuki/rest-template/pkg/testing/usecase"
 	"github.com/dhuki/rest-template/utils"
+	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/go-kit/kit/log"
 	"github.com/go-redis/redis/v8"
 	"github.com/gorilla/mux"
@@ -16,23 +19,25 @@ type server interface {
 }
 
 type testingServer struct {
-	mux         *mux.Router
-	db          *gorm.DB
-	redisClient *redis.Client
-	middlewares []mux.MiddlewareFunc
-	utils       utils.Utils
-	logger      log.Logger
+	mux          *mux.Router
+	db           *gorm.DB
+	elasticlient *elasticsearch.Client
+	redisClient  *redis.Client
+	middlewares  []mux.MiddlewareFunc
+	utils        utils.Utils
+	logger       log.Logger
 }
 
-func NewServer(mux *mux.Router, redisClient *redis.Client) testingServer {
+func NewServer(mux *mux.Router) testingServer {
 	return testingServer{
-		mux:         mux,
-		redisClient: redisClient,
+		mux: mux,
 	}
 }
 
-func (t testingServer) AddDatabase(db *gorm.DB) testingServer {
+func (t testingServer) AddPersistent(db *gorm.DB, elasticlient *elasticsearch.Client, redisClient *redis.Client) testingServer {
 	t.db = db
+	t.elasticlient = elasticlient
+	t.redisClient = redisClient
 	return t
 }
 
@@ -59,9 +64,13 @@ func (t testingServer) Start() {
 	presenter.NewHttpHandler(
 		t.mux,
 		usecase.UsecaseImpl{
-			TestTableRepo: infrastructure.NewTestTableInfrastructure(t.db),
-			Utils:         t.utils,
+			TestTableRepo: repo.NewTestTableRepo(
+				command.NewTestTableCommand(t.db),
+				query.NewTestTableQuery(t.elasticlient),
+			),
+			Utils: t.utils,
 		},
 		t.middlewares,
-		t.logger)
+		t.logger,
+	)
 }

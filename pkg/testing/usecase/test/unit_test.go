@@ -7,6 +7,7 @@ import (
 	"github.com/bxcodec/faker"
 	"github.com/dhuki/rest-template/common"
 	"github.com/dhuki/rest-template/pkg/testing/domain/entity"
+	"github.com/dhuki/rest-template/pkg/testing/domain/repo"
 	"github.com/dhuki/rest-template/pkg/testing/usecase"
 	"github.com/dhuki/rest-template/utils"
 	"github.com/stretchr/testify/assert"
@@ -18,15 +19,16 @@ import (
 // go tool cover -html=cp.out
 
 func TestGetAllData(t *testing.T) {
-	mockRepo := new(MockTestTableRepo)
-	mockEmail := new(MockEmail)
+	mockCommand := new(MockTestTableRepo)
+	mockRepo := repo.NewTestTableRepo(mockCommand, nil)
 
+	mockEmail := new(MockEmail)
 	utils := utils.NewUtils().WireWithEmail(mockEmail)
 
 	var data entity.TestTable
 	assert.Nil(t, faker.FakeData(&data))
 
-	mockRepo.On("GetAll", context.TODO()).Return([]entity.TestTable{data}, nil)
+	mockCommand.On("GetAll", context.TODO()).Return([]entity.TestTable{data}, nil)
 
 	usecase := usecase.UsecaseImpl{
 		TestTableRepo: mockRepo,
@@ -46,14 +48,16 @@ func TestGetAllData(t *testing.T) {
 }
 
 func TestGetDataByParam(t *testing.T) {
-	mockRepo := new(MockTestTableRepo)
+	mockCommand := new(MockTestTableRepo)
+	mockRepo := repo.NewTestTableRepo(mockCommand, nil)
+
 	mockEmail := new(MockEmail)
 	mockUtils := utils.NewUtils().WireWithEmail(mockEmail)
 
 	var expected entity.TestTable
 	assert.Nil(t, faker.FakeData(&expected))
 
-	mockRepo.On("Get", context.TODO(), expected.ID).Return(expected, nil)
+	mockCommand.On("Get", context.TODO(), expected.ID).Return(expected, nil)
 
 	usecase := usecase.UsecaseImpl{
 		TestTableRepo: mockRepo,
@@ -67,14 +71,16 @@ func TestGetDataByParam(t *testing.T) {
 }
 
 func TestGetDataByPath(t *testing.T) {
-	mockRepo := new(MockTestTableRepo)
+	mockCommand := new(MockTestTableRepo)
+	mockRepo := repo.NewTestTableRepo(mockCommand, nil)
+
 	mockEmail := new(MockEmail)
 	mockUtils := utils.NewUtils().WireWithEmail(mockEmail)
 
 	var expected entity.TestTable
 	assert.Nil(t, faker.FakeData(&expected))
 
-	mockRepo.On("Get", context.TODO(), expected.ID).Return(expected, nil)
+	mockCommand.On("Get", context.TODO(), expected.ID).Return(expected, nil)
 
 	usecase := usecase.UsecaseImpl{
 		TestTableRepo: mockRepo,
@@ -88,14 +94,16 @@ func TestGetDataByPath(t *testing.T) {
 }
 
 func TestCreateData(t *testing.T) {
-	mockRepo := new(MockTestTableRepo)
+	mockCommand := new(MockTestTableRepo)
+	mockRepo := repo.NewTestTableRepo(mockCommand, nil)
+
 	mockEmail := new(MockEmail)
 	mockUtils := utils.NewUtils().WireWithEmail(mockEmail)
 
 	var request entity.TestTable
 	assert.Nil(t, faker.FakeData(&request))
 
-	mockRepo.On("Create", context.TODO(), request).Return(nil)
+	mockCommand.On("Create", context.TODO(), request).Return(nil)
 
 	usecase := usecase.UsecaseImpl{
 		TestTableRepo: mockRepo,

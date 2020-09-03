@@ -27,6 +27,12 @@ var (
 	RedisPort string
 )
 
+// cons redis
+var (
+	ElasticsHost string
+	ElasticsPort string
+)
+
 // cons url
 var (
 	Host    string
@@ -44,7 +50,7 @@ var (
 
 // cons error
 var (
-	ErrDataNotFound = errors.New("Data not found")
+	ErrDataNotFound = errors.New("Data Not Found")
 	ErrAssertion    = errors.New("Error Assertion")
 	ErrCancelled    = errors.New("Request Cancelled")
 	ErrLimitExceed  = errors.New("Request Limit Exceeded")
@@ -72,6 +78,9 @@ func LoadCons(path string) error {
 
 	RedisHost = os.Getenv("redis.host")
 	RedisPort = os.Getenv("redis.port")
+
+	ElasticsPort = os.Getenv("elastics.port")
+	ElasticsPort = os.Getenv("elastics.port")
 
 	return nil
 }

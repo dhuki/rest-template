@@ -8,7 +8,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/dhuki/rest-template/config"
 	"github.com/dhuki/rest-template/pkg/testing/domain/entity"
-	"github.com/dhuki/rest-template/pkg/testing/infrastructure"
+	"github.com/dhuki/rest-template/pkg/testing/infrastructure/command"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -39,7 +39,7 @@ func TestUnitGetAll(t *testing.T) {
 	gormDB, err := config.NewTesting(db)
 	assert.Nil(t, err)
 
-	repo := infrastructure.NewTestTableInfrastructure(gormDB)
+	repo := command.NewTestTableCommand(gormDB)
 	_, err = repo.GetAll(context.TODO())
 	assert.Nil(t, err)
 
@@ -55,7 +55,7 @@ func TestUnitGet(t *testing.T) {
 	defer db.Close()
 
 	// expected query
-	mock.ExpectQuery(`SELECT * FROM "test_tables" WHERE "test_tables"."id" = $1`).
+	mock.ExpectQuery(`SELECT * FROM "test_tables" WHERE "test_tables"."id" = $1 LIMIT 1`).
 		WithArgs(1).
 		// will output from query above
 		WillReturnRows(sqlmock.NewRows([]string{"Name", "Description"}).
@@ -64,7 +64,7 @@ func TestUnitGet(t *testing.T) {
 	gormDB, err := config.NewTesting(db)
 	assert.Nil(t, err)
 
-	repo := infrastructure.NewTestTableInfrastructure(gormDB)
+	repo := command.NewTestTableCommand(gormDB)
 	_, err = repo.Get(context.TODO(), 1)
 	assert.Nil(t, err)
 
@@ -93,7 +93,7 @@ func TestUnitGetByName(t *testing.T) {
 	gormDB, err := config.NewTesting(db)
 	assert.Nil(t, err)
 
-	repo := infrastructure.NewTestTableInfrastructure(gormDB)
+	repo := command.NewTestTableCommand(gormDB)
 	actual, err := repo.GetByName(context.TODO(), "testing")
 	assert.Nil(t, err)
 
@@ -124,7 +124,7 @@ func TestUnitCreate(t *testing.T) {
 	gormDB, err := config.NewTesting(db)
 	assert.Nil(t, err)
 
-	repo := infrastructure.NewTestTableInfrastructure(gormDB)
+	repo := command.NewTestTableCommand(gormDB)
 	err = repo.Create(context.TODO(), entity.TestTable{
 		Name:        "testing",
 		Description: "testing",
